@@ -378,6 +378,18 @@ func failure(status int, body []byte) string {
 		// English one as a rate limit, and each rested its own fallback
 		// (#1669)
 		return failQuota
+	case status == 429 && zhipuResets.Match(body):
+		// Zhipu's 1308 and 1310, the GLM Coding Plan's 5-hour, weekly or
+		// monthly window spent, name when it is back without a zone, read
+		// as Beijing's (resetsZhipu): out of quota, not the rate limit the
+		// envelope's own type says. Through the Anthropic endpoint the
+		// refusal is typed rate_limit_error, which rateWords takes for a
+		// rate limit before usedUpWords (上限) is reached, so the key
+		// rested as one — a minute at a time, or, believing the reset it
+		// names, until then and not a moment sooner, a window its owner
+		// reset by hand included (#1024 built the plan's key to rest to
+		// its window, which the Chat endpoint's untyped refusal reaches)
+		return failQuota
 	case status == 429 && rateWords.Match(body) && !plannedWords.Match(body):
 		return failRate
 	case status >= 500 && quotaCodes.Match(body), status < 500 && usedUpWords.Match(body), status == 429 && plannedWords.Match(body):
